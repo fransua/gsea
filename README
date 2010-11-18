@@ -1,0 +1,10 @@
+###  README --- 
+
+to use:
+apt-get install python-setuptools python-numpy
+easy_install fisher
+
+
+
+
+

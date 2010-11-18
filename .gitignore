@@ -1,0 +1,4 @@
+*.pyc
+*~
+*_phyml_*.txt
+*.orig

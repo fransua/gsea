@@ -14,21 +14,23 @@ __title__   = "gene set tool kit v%s" % __version__
 # easy_install fisher
 from fisher import pvalue
 # in my extra_stats package
-from extra_stats.fdr import bh_qvalues
+from stats.fdr import bh_qvalues
 from numpy import log
 from sys import stderr
 from optparse import OptionParser
 from bisect import bisect_left
-
+from warnings import warn
 
 class GSEA:
     '''
     Fatiscan with upper case, it is an object.
-    from gene_set import Gene_set
-    infile = "data_test/Homo_sapiens.val"
-    annot  = "data_test/biol_proc_2-8.annot"
-    gaga = Gene_set (infile, annot)
-    lala = gaga.run_gsea()
+    USAGE:
+      from gsea import GSEA
+      infile = "data_test/Homo_sapiens_1.val"
+      annot  = "data_test/biol_proc_2-8.annot"
+      gene_set = GSEA (infile, annot)
+      gene_set.run_gsea()
+      gene_set.summarize("GO:0000278")
     '''
 
     def __init__(self, gene_vals, annot, partitions=30, use_order=True):
@@ -207,8 +209,7 @@ class GSEA:
             string.append (', '.join (list (annot[dico['p1']:])))
             return map (str, string)
         if self.gsea_dic == {}:
-            print >> stderr, 'ERROR: you do not have run GSEA yet...'
-            raise Exception
+            raise Exception ('ERROR: you do not have run GSEA yet...')
         cols = ['#term', 'part', 'term_size', \
                 'list1_positives', 'list1_negatives', \
                 'list2_positives', 'list2_negatives', \
@@ -239,7 +240,7 @@ def main ():
     for direct command line call
     '''
     opts = get_options()
-    gene_set = Gene_set(opts.infile, opts.annot)
+    gene_set = GSEA(opts.infile, opts.annot)
     gene_set.run_gsea(partitions = opts.partitions)
     if opts.pickle:
         from cPickle import dump
@@ -259,10 +260,10 @@ def _get_odd_ratio (p1, p2, n1, n2):
         if p2 == 0:
             odd = float ('inf')
         elif n1 == 0:
-            print >> stderr, "WARNING: Empty partition"
+            warn ("WARNING: Empty partition")
             odd = float ('-inf')
         elif n2 == 0:
-            print >> stderr, "WARNING: Empty partition"
+            warn ("WARNING: Empty partition")
             odd = float ('inf')
     return odd
 
@@ -298,7 +299,7 @@ Gene set enrichment analysis
     parser.add_option('-R', '--use_rank', action='store_true', \
                       dest='use_order', default=False, \
                       help=\
-                      '''[%default] Use rank of genes in stead of provided value to determine thresh value for delimiting different partitions.''')
+                      '''[%default] Use rank of genes in stead of provided value. This option will smooth wired distributions and equalize partition sizes.''')
     parser.add_option('-p', metavar="INT", dest='partitions', default=30, \
                       help='''[%default] Number of partitions.''')
     parser.add_option('--max_apv', metavar="FLOAT", dest='max_apv', default=1, \
