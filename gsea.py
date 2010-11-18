@@ -1,9 +1,18 @@
 #!/usr/bin/python
-#        Author: Francois-Jose Serra
-# Creation Date: 2010/08/17 16:46:02
+"""
+17 Aug 2010
 
-# easy_install fisher/ if not also in extra stats package
-from extra_stats.fisher import pvalue
+
+"""
+
+__author__  = "Francois-Jose Serra"
+__email__   = "francois@barrabin.org"
+__licence__ = "GPLv3"
+__version__ = "0.0b"
+__title__   = "gene set tool kit v%s" % __version__
+
+# easy_install fisher
+from fisher import pvalue
 # in my extra_stats package
 from extra_stats.fdr import bh_qvalues
 from numpy import log
@@ -11,19 +20,17 @@ from sys import stderr
 from optparse import OptionParser
 from bisect import bisect_left
 
-__version__ = "0.10"
-__title__   = "gene set tool kit v%s" % __version__
-
 
 class GSEA:
     '''
     Fatiscan with upper case, it is an object.
     from gene_set import Gene_set
-    infile = '/home/francisco/project/functional_anaysis_vs_evolution/v_56/Mammals/0_dataset/Homo_sapiens.dN_val'
-    annot  = '/home/francisco/project/functional_anaysis_vs_evolution/v_56/Mammals/funcDB/biol_proc_2-8.annot'
+    infile = "data_test/Homo_sapiens.val"
+    annot  = "data_test/biol_proc_2-8.annot"
     gaga = Gene_set (infile, annot)
     lala = gaga.run_gsea()
     '''
+
     def __init__(self, gene_vals, annot, partitions=30, use_order=True):
         '''
         init function, what is done when object is called.
