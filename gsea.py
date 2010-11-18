@@ -29,7 +29,7 @@ class GSEA:
       infile = "data_test/Homo_sapiens_1.val"
       annot  = "data_test/biol_proc_2-8.annot"
       gene_set = GSEA (infile, annot)
-      gene_set.run_gsea()
+      gene_set.run_fatiscan()
       gene_set.summarize("GO:0000278")
     '''
 
@@ -128,7 +128,7 @@ class GSEA:
             append_pv (pvalue (p1, n1, p2, n2).two_tail)
         
 
-    def run_gsea (self, partitions=30):
+    def run_fatiscan (self, partitions=30):
         '''
         run gsea needs python fisher, and fdr from extra stats
         speed notes: * making annot genes and order local does not
@@ -241,7 +241,7 @@ def main ():
     '''
     opts = get_options()
     gene_set = GSEA(opts.infile, opts.annot)
-    gene_set.run_gsea(partitions = opts.partitions)
+    gene_set.run_fatiscan(partitions = opts.partitions)
     if opts.pickle:
         from cPickle import dump
         dump (open (outfile, 'w'), self)
