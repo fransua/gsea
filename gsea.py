@@ -12,7 +12,11 @@ __version__ = "0.0b"
 __title__   = "gene set tool kit v%s" % __version__
 
 # easy_install fisher
-from fisher import pvalue
+try:
+    from fisher import pvalue
+except ImportError:
+    # or compile it somewhere...
+    from extra_stats.fisher import pvalue
 # in my extra_stats package
 from stats.fdr import bh_qvalues
 from numpy import log
@@ -178,6 +182,7 @@ class GSEA:
             genes2 =  all_genes - genes1
             self.gsea.append (self.enrichment (genes1, genes2))
         self._adjust_pvals()
+        
         def summarize(annot, with_part = False):
             '''
             returns result for most significant partition for given annot
