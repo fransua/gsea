@@ -33,7 +33,7 @@ class GSEA:
       from gsea import GSEA
       infile = "data_test/Homo_sapiens_1.val"
       annot  = "data_test/biol_proc_2-8.annot"
-      gene_set = GSEA (infile, annot)
+      gene_set = GSEA (infile, annot, use_order=True)
       list1 = gene_set.genes[10:250]
       list2 = gene_set.genes[900:1500]
       #gene_set.run_fatigo (list1)
@@ -67,7 +67,7 @@ class GSEA:
         genes should be ordered by value
         returns genes, values and order of values
         '''
-        if 'list' in repr (type (gene_vals)):
+        if type (gene_vals) is list :
             genes, values = zip (* sorted (gene_vals))
         else:
             genes, values = zip (*sorted ((i.strip().split('\t') \
@@ -91,9 +91,13 @@ class GSEA:
                      * dico
         '''
         dico = {}
-        for gene, annot in (i.strip().split('\t') for i in open (annot)):
-            # only store genes that we have in our list
-            if self.values.has_key(gene):
+        if type (annot) is dict :
+            dico = annot
+            return dico
+        values = self.values
+        for line in open (annot):
+            gene, annot = line.strip().split('\t')
+            if values.has_key (gene):
                 dico.setdefault (annot, []).append (gene)
         return dico
 
@@ -187,11 +191,12 @@ class GSEA:
             '''
             returns result for most significant partition for given annot
             '''
+            part, col = min (enumerate (self.gsea), \
+                             key=lambda (y,x): (x[annot]['apv'],y))
             if with_part:
-                return min (enumerate (self.gsea), \
-                            key=lambda (y,x): (x[annot]['apv'],y))
+                return part, col [annot]
             else:
-                return min (self.gsea [annot], key=lambda x: x [annot]['apv'])
+                return col [annot]
         self.__dict__['summarize'] = summarize
 
     def write_gsea (self, outfile, max_apv=1, all_parts=False):
