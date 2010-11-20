@@ -1,3 +1,0 @@
-#DB	Nº of significant terms
-Your annotations	586
-
