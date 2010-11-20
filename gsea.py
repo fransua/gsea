@@ -39,13 +39,13 @@ class GSEA:
       
     '''
 
-    def __init__(self, gene_vals, annot, partitions=30, use_order=True):
+    def __init__ (self, gene_vals, annot, partitions=30, use_order=True):
         '''
         init function, what is done when object is called.
         '''
         # get gene list and corresponding values
         self.use_order = use_order
-        self.genes, self.values, self.order = self._parse_input(gene_vals)
+        self.genes, self.values, self.order = self._parse_values (gene_vals)
 
         self.annot = self._parse_annot(annot)
         # sort genes in annot by their values...
@@ -54,7 +54,7 @@ class GSEA:
         self.gsea    = []
         self._thresh = []
 
-    def _parse_input(self, gene_vals):
+    def _parse_values (self, gene_vals):
         '''
         parse in file in format:
         geneID_1 <tab> value1
@@ -77,7 +77,7 @@ class GSEA:
             order = values[:]
         return genes, dict (zip (genes, values)), order
 
-    def _parse_annot(self, annot):
+    def _parse_annot (self, annot):
         '''
         parse annotation file in format:
         annotationA <tab> geneID_1
@@ -285,7 +285,7 @@ def get_options():
         usage="%prog [options] file [options [file ...]]",
         description="""\
 Gene set enrichment analysis                                                                                                
-.                                                                                .
+.                                                                           
 ********************************************                                      
 """
         )
