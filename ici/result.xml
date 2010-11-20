@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<result>
+  <metadata>
+    <item name="version" title="SDK version" type="MESSAGE" tags="" style="" group="" context="">v0.7</item>
+    <item name="date" title="Job date" type="MESSAGE" tags="" style="" group="" context="">2010-11-19</item>
+    <item name="tool" title="Tool executed" type="MESSAGE" tags="" style="" group="" context="">fatiscan</item>
+    <item name="flags" title="" type="MESSAGE" tags="" style="" group="" context="">SHOW_PVALUES</item>
+  </metadata>
+  <input>
+    <item name="tool" title="tool name" type="MESSAGE" tags="" style="" group="" context="">fatiscan</item>
+    <item name="annotations" title="Your own annotations" type="MESSAGE" tags="" style="" group="" context="">data_test/biol_proc_2-8.annot</item>
+    <item name="outdir" title="outdir to save the results" type="MESSAGE" tags="" style="" group="" context="">ici</item>
+    <item name="ranked-list" title="the feature data containig the ranked list" type="MESSAGE" tags="" style="" group="" context="">data_test/Homo_sapiens_1.val</item>
+    <item name="partitions" title="the number of partitions" type="MESSAGE" tags="" style="" group="" context="">30</item>
+    <item name="home" title="babelomics home path" type="MESSAGE" tags="" style="" group="" context="">/opt/soft/babelomics</item>
+  </input>
+  <output>
+    <item name="ranked_list" title="Ranked list" type="FILE" tags="RANKED_LIST,CLEAN" style="" group="Input data" context="">ranked_list.txt</item>
+    <item name="annotations_per_db" title="Id annotations per DB" type="FILE" tags="TABLE,SUMMARY_TABLE" style="" group="Summary" context="">annotations_per_db.txt</item>
+    <item name="id_list" title="Id list (sorted)" type="FILE" tags="IDLIST,SORTED" style="" group="Input data" context="">id_list.txt</item>
+    <item name="significant" title="Number of significant terms per DB" type="FILE" tags="TABLE,SUMMARY_TABLE,SIGNIFICANT_COUNT_TABLE" style="" group="Significant Results" context="">significant_count_${pvalue}.txt</item>
+    <item name="statistic" title="Statistic (sorted)" type="FILE" tags="STATISTIC,SORTED" style="" group="Input data" context="">statistic.txt</item>
+    <item name="your_annotation" title="Your annotations" type="FILE" tags="YOUR_ANNOTATIONS_TERM" style="" group="All results" context="">your_annotation.txt</item>
+    <item name="significant_your_annotation" title="Your annotations significant terms (pvalue&lt;0.005)" type="FILE" tags="SIGNIFICANT,TABLE,FATISCAN_TABLE,YOUR_ANNOTATIONS_TERM" style="" group="Significant Results.Your annotations" context="pvalue==0.005">significant_your_annotation_0.005.txt</item>
+    <item name="significant_your_annotation" title="Your annotations significant terms (pvalue&lt;0.01)" type="FILE" tags="SIGNIFICANT,TABLE,FATISCAN_TABLE,YOUR_ANNOTATIONS_TERM" style="" group="Significant Results.Your annotations" context="pvalue==0.01">significant_your_annotation_0.01.txt</item>
+    <item name="significant_your_annotation" title="Your annotations significant terms (pvalue&lt;0.05)" type="FILE" tags="SIGNIFICANT,TABLE,FATISCAN_TABLE,YOUR_ANNOTATIONS_TERM" style="" group="Significant Results.Your annotations" context="pvalue==0.05">significant_your_annotation_0.05.txt</item>
+    <item name="significant_your_annotation" title="Your annotations significant terms (pvalue&lt;0.1)" type="FILE" tags="SIGNIFICANT,TABLE,FATISCAN_TABLE,YOUR_ANNOTATIONS_TERM" style="" group="Significant Results.Your annotations" context="pvalue==0.1">significant_your_annotation_0.1.txt</item>
+    <item name="annot_your_annotation" title="Annotations for Your annotations" type="FILE" tags="ANNOTATION" style="" group="Annotation files" context="">your_annotation.annot</item>
+  </output>
+</result>

@@ -24,6 +24,7 @@ from sys import stderr
 from optparse import OptionParser
 from bisect import bisect_left
 from warnings import warn
+from hashlib import md5
 
 class GSEA:
     '''
@@ -50,7 +51,6 @@ class GSEA:
         # get gene list and corresponding values
         self.use_order = use_order
         self.genes, self.values, self.order = self._parse_input(gene_vals)
-
         self.annot = self._parse_annot(annot)
         # sort genes in annot by their values...
         # useful to know which gene in list1 or list2
@@ -111,6 +111,33 @@ class GSEA:
                                   key=lambda x: self.values[x])
         return dico
 
+    def _adjust_pvals (self, pvalues, partitions):
+        '''
+        adjusts pvalues of a list of fatigos using fdr
+        '''
+        pvalues = map (lambda x: x['pv'], self.gsea.values())
+        qvalues = iter (bh_qvalues (pvalues))
+        for nam in self.gsea:
+            self.gsea[nam]['apv'] = qvalues.next()
+
+    def _enrichment (self, genes1, genes2, part):
+        '''
+        computes an enrichment test between two sets of lists of genes
+        '''
+        len_genes1 = len (genes1)
+        len_genes2 = len (genes2)
+        # start fishers
+        for annot, annot_genes in self.annot.iteritems():
+            nam = annot + '|' + part
+            p1 = len (set (annot_genes)  & genes1)
+            p2 = len (annot_genes) - p1
+            n1 = len_genes1  - p1
+            n2 = len_genes2  - p2
+            self.gsea [nam] = {'p1' : p1, 'n1': n1,
+                               'p2' : p2, 'n2': n2,
+                               'pv' : pvalue (p1, n1, p2, n2).two_tail,
+                               'odd': _get_odd_ratio (p1, p2, n1, n2)}
+
     def run_fatigo (self, genes1, genes2=None):
         '''
         run fatigo analysis
@@ -121,41 +148,9 @@ class GSEA:
             genes2 = set (self.genes) - set (genes1)
         else:
             genes2 = set (genes2)
-        self.gsea = [self.enrichment (genes1, genes2)]
-        self._adjust_pvals()
-
-    def _adjust_pvals (self):
-        '''
-        adjusts pvalues of a list of fatigos using fdr
-        '''
-        pvalues = []
-        for part in xrange (len (self.gsea)):
-            for annot in self.gsea [part]:
-                pvalues.append (self.gsea [part][annot]['pv'])
-        qvalues = iter (bh_qvalues (pvalues))
-        for part in xrange (len (self.gsea)):
-            for annot in self.gsea [part]:
-                self.gsea[part][annot]['apv'] = qvalues.next()
-
-    def enrichment (self, genes1, genes2):
-        '''
-        computes an enrichment test between two sets of lists of genes
-        '''
-        dico = {}
-        len_genes1 = len (genes1)
-        len_genes2 = len (genes2)
-        # start fishers
-        for annot, annot_genes in self.annot.iteritems():
-            p1  = len (set (annot_genes)  & genes1)
-            p2  = len (annot_genes) - p1
-            n1  = len_genes1  - p1
-            n2  = len_genes2  - p2
-            odd = _get_odd_ratio (p1, p2, n1, n2)
-            dico[annot] = {'p1' : p1, 'n1': n1,
-                           'p2' : p2, 'n2': n2,
-                           'odd': odd,
-                           'pv' : pvalue (p1, n1, p2, n2).two_tail}
-        return dico
+        self.gsea = [self._enrichment (genes1, genes2).next()]
+        pvals = self._enrichment (genes1, genes2).next()
+        self._adjust_pvals(pvals)
 
     def run_fatiscan (self, partitions=30):
         '''
@@ -166,35 +161,33 @@ class GSEA:
                      * no more ideas...
         ref: ...
         '''
-        # create local functions to skip call... faster
         order_index = self.order.index
-        # intialize dict
-        self.gsea = []
-        # define part size. order[-1] == max(order)
+        self.gsea = {}
         rank = float (len (self.order)-1)/partitions
         # define cutoff value for each partition
-        self._thresh = [bisect_left (self.order,
-                                     rank * (part + 1)) \
+        self._thresh = [bisect_left (self.order, rank * (part + 1)) \
                         for part in xrange(partitions)]
         all_genes = set (self.genes)
-        # start fishers
+        pvals = []
         for part in xrange(partitions):
             try:
                 genes1 = set (self.genes[:order_index (self._thresh [part])])
             except ValueError:
                 continue
-            genes2 =  all_genes - genes1
-            self.gsea.append (self.enrichment (genes1, genes2))
-        self._adjust_pvals()
+            self._enrichment (genes1, all_genes - genes1, str (part))
+        self._adjust_pvals (pvals, partitions)
         
-        def summarize(annot, with_part = False):
+        def summarize(annot, with_part=False):
             '''
             returns result for most significant partition for given annot
             '''
-            part, col = min (enumerate (self.gsea), \
-                             key=lambda (y,x): (x[annot]['apv'],y))
+            result = []
+            for part in xrange (partitions):
+                result.append (self.gsea [annot + '|' + str (part)])
+            part, col = min (enumerate (result),
+                             key=lambda (y,x): (x['apv'],y))
             if with_part:
-                return part, col [annot]
+                return part, col
             else:
                 return col [annot]
         self.__dict__['summarize'] = summarize
@@ -228,23 +221,18 @@ class GSEA:
         out = open (outfile, 'w')
         out.write('\t'.join(cols)+'\n')
         if all_parts:
-            for part in xrange (len (self.gsea)):
-                for annot in self.gsea [part]:
-                    if self.gsea [part][annot]['apv'] > max_apv:
+            for annot in self.gsea.annot:
+                for part in xrange(30):
+                    if self.gsea[annot][part]['apv'] > max_apv:
                         continue
-                    string = _get_string(self.gsea[part][annot],
+                    string = _get_string(self.gsea[annot][part], \
                                          self.annot[annot])
                     out.write ('\t'.join ([annot] + [str(part)] +string) + '\n')
         else:
             for annot in self.annot:
-                part = min (self.gsea, key=lambda x: x[annot]['apv']) [annot]
-                for x_part in xrange (len (self.gsea)):
-                    if self.gsea[x_part][annot] == part:
-                        break
-                if max_apv < part['apv']:
-                    continue
-                string = _get_string(part, self.annot[annot])
-                out.write ('\t'.join ([annot] + [str(x_part)] + string) + '\n')
+                part, col = self.summarize (annot, True)
+                string = _get_string(col, annot)
+                out.write ('\t'.join ([annot] + [str(part)] + string) + '\n')
         out.close()
 
 def main ():
