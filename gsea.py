@@ -243,13 +243,21 @@ def main ():
     '''
     opts = get_options()
     gene_set = GSEA(opts.infile, opts.annot)
-    gene_set.run_fatiscan(partitions=opts.partitions, verb=opts.verb)
+    if opts.algo == 'fatiscan':
+        gene_set.run_fatiscan (partitions=opts.partitions, verb=opts.verb)
+    elif opts.algo == 'fatigo':
+        gene_set.run_fatigo (parse_list (opts.list1), parse_list (opts.list2))
     if opts.pickle:
         from cPickle import dump
         dump (open (outfile, 'w'), self)
     else:
         gene_set.write_gsea(opts.outfile, all_parts=opts.all_parts, \
                             max_apv=float(opts.max_apv))
+
+def parse_list():
+    '''
+    '''
+    pass
 
 def _get_odd_ratio (p1, p2, n1, n2):
     '''
@@ -283,10 +291,22 @@ Gene set enrichment analysis
 """
         )
 
-    parser.add_option('-i', dest='infile', metavar="PATH", \
+    parser.add_option('-i', dest='infile', metavar="PATH",
                       help='''path to input file with a ranked list, in format:                             
                       geneID_1 <tab> value1                                                        
                       geneID_2 <tab> value2                                                         
+                      ...
+                      ''')
+    parser.add_option('-x', dest='list1', metavar="PATH",
+                      help='''path to first input file with a list of genes, in format:                             
+                      geneID_1                                                        
+                      geneID_2                                                         
+                      ...
+                      ''')
+    parser.add_option('-y', dest='list2', metavar="PATH",
+                      help='''path to second input file with a list of genes, in format:                             
+                      geneID_1                                                        
+                      geneID_2                                                         
                       ...
                       ''')
     parser.add_option('-a', dest='annot', metavar="PATH", \
@@ -303,6 +323,9 @@ Gene set enrichment analysis
                       '''[%default] Use rank of genes in stead of provided value. This option will smooth wired distributions and equalize partition sizes.''')
     parser.add_option('-p', metavar="INT", dest='partitions', default=30, \
                       help='''[%default] Number of partitions.''')
+    parser.add_option('-F', dest='algo', default='fatiscan', \
+                      help='''[%default] default algorithm.                              
+                        * fatiscan needs -i ''')
     parser.add_option('--max_apv', metavar="FLOAT", dest='max_apv', default=1, \
                       help='''[%default] Only write to outfile results with adjusted pvalue higher than specified value.''')
     parser.add_option('--long', dest='all_parts', action='store_true', default=False, \
@@ -315,7 +338,8 @@ Gene set enrichment analysis
                       help=\
                       '[%default] Talk a bit... ')
     opts = parser.parse_args()[0]
-    if not opts.infile or not opts.annot or not opts.outfile:
+    if (not opts.infile and (not opts.list1 or not opts.list2)) \
+           or not opts.annot or not opts.outfile:
         exit(parser.print_help())
     return opts
 
