@@ -5,11 +5,22 @@
 
 """
 
-__author__  = "Francois-Jose Serra"
-__email__   = "francois@barrabin.org"
-__licence__ = "GPLv3"
-__version__ = "0.0b"
-__title__   = "gene set tool kit v%s" % __version__
+__author__     = "Francois-Jose Serra"
+__email__      = "francois@barrabin.org"
+__licence__    = "GPLv3"
+__version__    = "0.0b"
+__title__      = "gene set tool kit v%s" % __version__
+__references__ = '''
+        Al-Shahrour, F., Díaz-Uriarte, R., & Dopazo, J. 2004.
+             FatiGO: a web tool for finding significant associations of Gene Ontology terms with groups of genes.
+             Bioinformatics (Oxford, England) 20: 578-80.
+             Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/14990455
+        Al-Shahrour, F., Díaz-Uriarte, R., & Dopazo, J. 2005.
+             Discovering molecular functions significantly related to phenotypes by combining gene expression data and biological information.
+             Bioinformatics (Oxford, England) 21: 2988-93.
+             Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/15840702
+'''
+
 
 # easy_install fisher
 try:
@@ -144,7 +155,11 @@ class GSEA:
     def run_fatigo (self, genes1, genes2=None):
         '''
         run fatigo analysis
-        ref: ...
+
+        ref: Al-Shahrour, F., Díaz-Uriarte, R., & Dopazo, J. 2004.
+             FatiGO: a web tool for finding significant associations of Gene Ontology terms with groups of genes.
+             Bioinformatics (Oxford, England) 20: 578-80.
+             Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/14990455
         '''
         genes1 = set (genes1)
         if not genes2:
@@ -162,7 +177,11 @@ class GSEA:
                        significantly speed up process.
                      * putting external method with bissect part neither
                      * no more ideas...
-        ref: ...
+
+        ref: Al-Shahrour, F., Díaz-Uriarte, R., & Dopazo, J. 2005.
+             Discovering molecular functions significantly related to phenotypes by combining gene expression data and biological information.
+             Bioinformatics (Oxford, England) 21: 2988-93.
+             Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/15840702
         '''
         order_index = self.order.index
         self.gsea = {}
