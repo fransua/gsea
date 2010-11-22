@@ -8,7 +8,7 @@
 __author__     = "Francois-Jose Serra"
 __email__      = "francois@barrabin.org"
 __licence__    = "GPLv3"
-__version__    = "0.0b"
+__version__    = "0.1b"
 __title__      = "gene set tool kit v%s" % __version__
 __references__ = '''
         Al-Shahrour, F., Diaz-Uriarte, R., & Dopazo, J. 2004.
@@ -55,18 +55,21 @@ class GSEA:
       
     '''
 
-    def __init__ (self, gene_vals, annot, use_order=True):
+    def __init__ (self, gene_vals, annot, algo='fatiscan', use_order=True):
         '''
         init function, what is done when object is called.
         '''
         # get gene list and corresponding values
         self.use_order = use_order
-        self.genes, self.values, self.order = self._parse_values (gene_vals)
 
-        self.annot = self._parse_annot(annot)
-        # sort genes in annot by their values...
-        # useful to know which gene in list1 or list2
-        self.annot   = self._order_genes_in_annot()
+        if algo == 'fatiscan':
+            self.genes, self.values, self.order = self._parse_values (gene_vals)
+            self.annot = self._parse_annot(annot)
+            # sort genes in annot by their values...
+            # useful to know which gene in list1 or list2
+            self.annot   = self._order_genes_in_annot()
+        elif algo == 'fatigo':
+            self.annot = self._parse_annot(annot)
         self.gsea    = {}
         self._thresh = []
 
@@ -105,10 +108,17 @@ class GSEA:
         if type (annot) is dict :
             dico = annot
             return dico
-        values = self.values
-        for line in open (annot):
-            gene, annot = line.strip().split('\t')
-            if values.has_key (gene):
+        if hasattr (self, 'values'):
+            # in case we already have a list of genes we can reduce annotation
+            # to our genes
+            values = self.values
+            for line in open (annot):
+                gene, annot = line.strip().split('\t')
+                if values.has_key (gene):
+                    dico.setdefault (annot, []).append (gene)
+        else:
+            for line in open (annot):
+                gene, annot = line.strip().split('\t')
                 dico.setdefault (annot, []).append (gene)
         return dico
 
@@ -144,7 +154,7 @@ class GSEA:
         # start fishers
         for ann, annot_genes in self.annot.iteritems():
             p1 = len (set (annot_genes) & genes1)
-            p2 = len (annot_genes) - p1
+            p2 = len (set (annot_genes) & genes2)
             n1 = len_genes1 - p1
             n2 = len_genes2 - p2
             dico [ann + part] = {'p1' : p1, 'n1': n1,
@@ -166,9 +176,21 @@ class GSEA:
             genes2 = set (self.genes) - set (genes1)
         else:
             genes2 = set (genes2)
-        self.gsea = [self._enrichment (genes1, genes2).next()]
         self._enrichment (genes1, genes2)
         self._adjust_pvals()
+        def summarize(annot, with_part=False):
+            '''
+            returns result for most significant partition for given annot
+            '''
+            result = []
+            result.append (self.gsea [annot + '|'])
+            part, col = min (enumerate (result),
+                             key=lambda (y,x): (x['apv'],y))
+            if with_part:
+                return part, col
+            else:
+                return col
+        self.__dict__['summarize'] = summarize
 
     def run_fatiscan (self, partitions=30, verb=False):
         '''
@@ -236,8 +258,8 @@ class GSEA:
             raise Exception ('ERROR: you do not have run GSEA yet...')
         cols = ['#term', 'part', 'list1_positives', 'list1_negatives',
                 'list2_positives', 'list2_negatives', 'odds_ratio_log',
-                'pvalue', 'adj_pvalue', 'list1_positive_ids',
-                'list2_positive_ids']
+                'pvalue', 'adj_pvalue', 'list1_positive_ids (ordered by value)',
+                'list2_positive_ids (ordered by value)']
         out = open (outfile, 'w')
         out.write('\t'.join(cols)+'\n')
         if all_parts:
@@ -261,12 +283,15 @@ def main ():
     for direct command line call
     '''
     opts = get_options()
-    gene_set = GSEA(opts.infile, opts.annot, use_order=opts.use_order)
+    gene_set = GSEA(opts.infile, opts.annot, algo=opts.algo,
+                    use_order=opts.use_order)
     if opts.algo == 'fatiscan':
         gene_set.run_fatiscan (partitions=opts.partitions, verb=opts.verb)
     elif opts.algo == 'fatigo':
-        gene_set.run_fatigo (map (lambda x:strip(), open (opts.list1).readlines()),
-                             map (lambda x:strip(), open (opts.list2).readlines()))
+        gene_set.run_fatigo (map (lambda x:x.strip(),
+                                  open (opts.list1).readlines()),
+                             map (lambda x:x.strip(),
+                                  open (opts.list2).readlines()))
     if opts.pickle:
         from cPickle import dump
         dump (open (outfile, 'w'), self)
@@ -340,7 +365,8 @@ Gene set enrichment analysis
                       help='''[%default] Number of partitions.''')
     parser.add_option('-F', dest='algo', default='fatiscan', \
                       help='''[%default] default algorithm.                              
-                        * fatiscan needs -i ''')
+                        * fatiscan needs -i                                         
+                        * fatigo needs -x and -y ''')
     parser.add_option('--max_apv', metavar="FLOAT", dest='max_apv', default=1, \
                       help='''[%default] Only write to outfile results with adjusted pvalue higher than specified value.''')
     parser.add_option('--long', dest='all_parts', action='store_true', default=False, \

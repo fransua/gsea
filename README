@@ -4,7 +4,11 @@ to use:
 apt-get install python-setuptools python-numpy
 easy_install fisher
 
+try examples in data_test:
 
+python gsea.py -i data_test/Homo_sapiens_1.val -a data_test/biol_proc_2-8.annot -o lala --verbose -F fatiscan
 
+python gsea.py -x data_test/list1 -y data_test/list2 -a data_test/biol_proc_2-8.annot -o lele -F fatigo
 
+have a look to out files lala and lele.
 
