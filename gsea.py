@@ -11,11 +11,11 @@ __licence__    = "GPLv3"
 __version__    = "0.0b"
 __title__      = "gene set tool kit v%s" % __version__
 __references__ = '''
-        Al-Shahrour, F., Díaz-Uriarte, R., & Dopazo, J. 2004.
+        Al-Shahrour, F., Diaz-Uriarte, R., & Dopazo, J. 2004.
              FatiGO: a web tool for finding significant associations of Gene Ontology terms with groups of genes.
              Bioinformatics (Oxford, England) 20: 578-80.
              Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/14990455
-        Al-Shahrour, F., Díaz-Uriarte, R., & Dopazo, J. 2005.
+        Al-Shahrour, F., Diaz-Uriarte, R., & Dopazo, J. 2005.
              Discovering molecular functions significantly related to phenotypes by combining gene expression data and biological information.
              Bioinformatics (Oxford, England) 21: 2988-93.
              Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/15840702
@@ -156,7 +156,7 @@ class GSEA:
         '''
         run fatigo analysis
 
-        ref: Al-Shahrour, F., Díaz-Uriarte, R., & Dopazo, J. 2004.
+        ref: Al-Shahrour, F., Diaz-Uriarte, R., & Dopazo, J. 2004.
              FatiGO: a web tool for finding significant associations of Gene Ontology terms with groups of genes.
              Bioinformatics (Oxford, England) 20: 578-80.
              Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/14990455
@@ -178,7 +178,7 @@ class GSEA:
                      * putting external method with bissect part neither
                      * no more ideas...
 
-        ref: Al-Shahrour, F., Díaz-Uriarte, R., & Dopazo, J. 2005.
+        ref: Al-Shahrour, F., Diaz-Uriarte, R., & Dopazo, J. 2005.
              Discovering molecular functions significantly related to phenotypes by combining gene expression data and biological information.
              Bioinformatics (Oxford, England) 21: 2988-93.
              Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/15840702
