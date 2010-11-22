@@ -34,7 +34,7 @@ class GSEA:
       from gsea import GSEA
       infile = "data_test/Homo_sapiens_1.val"
       annot  = "data_test/biol_proc_2-8.annot"
-      gene_set = GSEA (infile, annot, use_order=True)
+      gene_set = GSEA (infile, annot, use_order=False)
       list1 = gene_set.genes[10:250]
       list2 = gene_set.genes[900:1500]
       #gene_set.run_fatigo (list1)
@@ -71,10 +71,9 @@ class GSEA:
         if type (gene_vals) is list :
             genes, values = zip (* sorted (gene_vals))
         else:
-            genes, values = zip (*sorted ((i.strip().split('\t') \
-                                           for i in open(gene_vals)), \
+            genes, values = zip (*sorted ((i.strip().split('\t')
+                                           for i in open(gene_vals)),
                                           key=lambda x: float(x[1])))
-        values, genes = zip (*sorted (zip (values, genes)))
         values = map (float, values)
         if self.use_order:
             order = map (values.index, values)
@@ -167,13 +166,14 @@ class GSEA:
         '''
         order_index = self.order.index
         self.gsea = {}
-        rank = float (len (self.order)-1)/partitions
+        rank = float (max (self.order) - min (self.order))/partitions
         # define cutoff value for each partition
-        self._thresh = [bisect_left (self.order, rank * (part + 1)) \
-                        for part in xrange(partitions)]
+        self._below_thresh = [bisect_left (self.order, rank * (part + 1)) \
+                              for part in xrange(partitions)]
+        self._thresh = [rank * (part + 1) for part in xrange(partitions)]
         all_genes = set (self.genes)
         for part in xrange(partitions):
-            genes1 = set (self.genes [:order_index (self._thresh [part])])
+            genes1 = set (self.genes [:self._below_thresh [part]])
             if verb:
                 print 'partition %2s, thresh value= %-8s number of genes: %d'\
                       % (part, self._thresh [part], len (genes1))
@@ -242,11 +242,12 @@ def main ():
     for direct command line call
     '''
     opts = get_options()
-    gene_set = GSEA(opts.infile, opts.annot)
+    gene_set = GSEA(opts.infile, opts.annot, use_order=opts.use_order)
     if opts.algo == 'fatiscan':
         gene_set.run_fatiscan (partitions=opts.partitions, verb=opts.verb)
     elif opts.algo == 'fatigo':
-        gene_set.run_fatigo (parse_list (opts.list1), parse_list (opts.list2))
+        gene_set.run_fatigo (map (lambda x:strip(), open (opts.list1).readlines()),
+                             map (lambda x:strip(), open (opts.list2).readlines()))
     if opts.pickle:
         from cPickle import dump
         dump (open (outfile, 'w'), self)
@@ -254,10 +255,6 @@ def main ():
         gene_set.write_gsea(opts.outfile, all_parts=opts.all_parts, \
                             max_apv=float(opts.max_apv))
 
-def parse_list():
-    '''
-    '''
-    pass
 
 def _get_odd_ratio (p1, p2, n1, n2):
     '''
@@ -290,7 +287,6 @@ Gene set enrichment analysis
 ********************************************                                      
 """
         )
-
     parser.add_option('-i', dest='infile', metavar="PATH",
                       help='''path to input file with a ranked list, in format:                             
                       geneID_1 <tab> value1                                                        
