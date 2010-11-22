@@ -10,16 +10,16 @@ __email__      = "francois@barrabin.org"
 __licence__    = "GPLv3"
 __version__    = "0.1b"
 __title__      = "gene set tool kit v%s" % __version__
-__references__ = '''
+__references__ = ['''
         Al-Shahrour, F., Diaz-Uriarte, R., & Dopazo, J. 2004.
              FatiGO: a web tool for finding significant associations of Gene Ontology terms with groups of genes.
              Bioinformatics (Oxford, England) 20: 578-80.
-             Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/14990455
+             Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/14990455''','''
         Al-Shahrour, F., Diaz-Uriarte, R., & Dopazo, J. 2005.
              Discovering molecular functions significantly related to phenotypes by combining gene expression data and biological information.
              Bioinformatics (Oxford, England) 21: 2988-93.
              Retrieved from http://www.ncbi.nlm.nih.gov/pubmed/15840702
-'''
+''']
 
 
 # easy_install fisher
