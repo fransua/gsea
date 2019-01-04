@@ -83,7 +83,8 @@ class GSEA:
         returns genes, values and order of values
         '''
         if type (gene_vals) is list :
-            genes, values = zip (* sorted (gene_vals))
+            genes, values = zip (* sorted (gene_vals,
+                                           key=lambda x: float(x[1])))
         else:
             genes, values = zip (*sorted ((i.strip().split('\t')
                                            for i in open(gene_vals)),
@@ -98,8 +99,8 @@ class GSEA:
     def _parse_annot (self, annot):
         '''
         parse annotation file in format:
-        annotationA <tab> geneID_1
-        annotationA <tab> geneID_2
+        geneID_1 <tab> annotationA
+        geneID_2 <tab> annotationA
         ...
         speed notes: * iterator on for for
                      * dico
@@ -383,8 +384,6 @@ Gene set enrichment analysis
            or not opts.annot or not opts.outfile:
         exit(parser.print_help())
     return opts
-
-
 
 
 if __name__ == "__main__":
